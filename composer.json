@@ -1,6 +1,6 @@
 {
     "name": "cityware/city-utility",
-    "description": " ",
+    "description": "Cityware Utility",
     "license": "GPL-3.0",
     "keywords": [
         "cityware",
@@ -28,6 +28,7 @@
     "suggest": {
         "ext-intl": "Required for most features of Zend\\I18n; included in default builds of PHP"
     },
+    "minimum-stability":"dev",
     "prefer-stable": true,
     "extra": {
         "branch-alias": {
