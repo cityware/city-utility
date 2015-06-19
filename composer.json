@@ -31,7 +31,6 @@
     "suggest": {
         "ext-intl": "Required for most features of Zend\\I18n; included in default builds of PHP"
     },
-    "minimum-stability": "dev",
     "prefer-stable": true,
     "extra": {
         "branch-alias": {
