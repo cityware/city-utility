@@ -76,3 +76,15 @@ class MultiProcess {
     }
 
 }
+
+
+/*
+Example
+function myFunctionToExecuteMultipleTimes($dataArray){
+    // code to execute
+}
+
+$oMultiProc = new Multiprocess($dataArray, ‘myFunctionToExecuteMultipleTimes’);
+$oMultiProc->run(20); // run 20 processes on the same time
+
+ */
