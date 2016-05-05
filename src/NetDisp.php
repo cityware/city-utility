@@ -62,8 +62,6 @@ class NetDisp {
         }
 
         foreach ($aLinks['nome'] as $keyLinksDef => $valueLinksDef) {
-            $roteadorOrigem[$valueLinksDef] = $aLinks['origem'][$keyLinksDef];
-            $roteadorDestino[$valueLinksDef] = $aLinks['destino'][$keyLinksDef];
             $disponibilidadeLink[$valueLinksDef] = $aLinks['disponibilidade'][$keyLinksDef];
             $statusLink[$valueLinksDef] = $aLinks['ativo'][$keyLinksDef];
         }
@@ -71,37 +69,6 @@ class NetDisp {
         if ($this->debug) {
             echo '<pre>';
         }
-
-
-        /*
-          $connectionMatrix = Array();
-
-          foreach ($statusHost as $keyHostMatrix => $valueHostMatrix) {
-
-          if ($this->debug) {
-          print "\n" . $keyHostMatrix . ":";
-          }
-          foreach ($statusLink as $keyLinkMatrix => $valueLinkMatrix) {
-          if ($roteadorOrigem[$keyLinkMatrix] == $keyHostMatrix) {
-          $connectionMatrix[$keyHostMatrix][$keyLinkMatrix] = $roteadorDestino[$keyLinkMatrix];
-          if ($this->debug) {
-          print $keyLinkMatrix . "," . $connectionMatrix[$keyHostMatrix][$keyLinkMatrix] . ";";
-          }
-          } else if ($roteadorDestino[$keyLinkMatrix] == $keyHostMatrix) {
-          $connectionMatrix[$keyHostMatrix][$keyLinkMatrix] = $roteadorOrigem[$keyLinkMatrix];
-          if ($this->debug) {
-          print $keyLinkMatrix . "," . $connectionMatrix[$keyHostMatrix][$keyLinkMatrix] . ";";
-          }
-          }
-          }
-          if ($this->debug) {
-          echo "<br>";
-          }
-          }
-         * 
-         */
-
-
 
         $connectionMatrix = $this->connectionMatrix($aHosts, $aLinks);
         $somaDisp = 0;
@@ -296,7 +263,7 @@ class NetDisp {
                             }
                         }
 
-                        if (($statusLink[$linkSub] == 1 ) AND ( $statusHost[$matriz[$proximo][$linkSub]] == 1)) {
+                        if ((isset($statusLink[$linkSub]) and $statusLink[$linkSub] == 1 ) AND ( isset($statusHost[$matriz[$proximo][$linkSub]]) and $statusHost[$matriz[$proximo][$linkSub]] == 1)) {
                             $anterior[$aux] = $proximo;
                             $testado[$linkSub] = 1;
                             $ultimo = $proximo;
@@ -306,7 +273,7 @@ class NetDisp {
                         }
                     }
 
-                    if (($achei == 1) AND ( $statusLink[$linkSub] == 1)) {
+                    if (($achei == 1) AND (isset($statusLink[$linkSub]) and $statusLink[$linkSub] == 1)) {
                         if ($matriz[$ultimo][$linkSub] == $this->target) {
                             $proximo = $matriz[$ultimo][$linkSub];
                             return 1;
