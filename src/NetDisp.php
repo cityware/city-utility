@@ -116,7 +116,6 @@ class NetDisp {
                     $binstrLink = substr($binstrLink, 0, strlen($binstrLink) - 1);
                 }
 
-
                 $conecta = $this->testaConexao($connectionMatrix, $statusLink, $statusHost);
 
                 if (($jgl == $totalLinks) AND ( $conecta == 0)) {
@@ -126,16 +125,12 @@ class NetDisp {
                 if ($conecta == 1) {
                     $prodDisp = 1;
 
-                    //echo '<pre>';
-                    //print_r($statusHost);
-
                     foreach ($statusHost as $keyStatusHost => $valueNodeHost) {
                         if (intval($valueNodeHost) == 1) {
                             $prodDisp = bcmul($prodDisp, floatval($disponibilidadeHost[$keyStatusHost]), 64);
                         } else {
                             $prodDisp = bcmul($prodDisp, bcsub(1, floatval($disponibilidadeHost[$keyStatusHost]), 64), 64);
                         }
-                        //echo $prodDisp." - Host: {$keyStatusHost} <br>";
                     }
 
                     foreach ($statusLink as $keyStatusLink => $valueStatusLink) {
@@ -144,9 +139,7 @@ class NetDisp {
                         } else {
                             $prodDisp = bcmul($prodDisp, bcsub(1, floatval($disponibilidadeLink[$keyStatusLink]), 64), 64);
                         }
-                        //echo $prodDisp." - Link: {$keyStatusLink} <br>";
                     }
-                    //exit;
                     $somaDisp = bcadd($somaDisp, $prodDisp, 64);
                 }
             }
