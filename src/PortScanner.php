@@ -29,21 +29,18 @@ class PortScanner {
     // TODO: validate that the starting port is between 1 and 65536
     // TODO: validate that the ending port is between 1 and 65536
     // TODO: validate that the ending port is after the starting port
-    public function __construct($hostIP = '127.0.0.1', $startPort = 1, $endPort = 1024, $timeout = 1) {
+    public function __construct($hostIP = '127.0.0.1', $startPort = 1, $endPort = 1024, $typePort = 'tcp', $timeout = 1) {
         $this->startPort = $startPort;
         $this->endPort = $endPort;
         $this->hostIP = $hostIP;
         $this->timeout = $timeout;
+        $this->typePort = $typePort;
         set_time_limit(0);
     }
     
     public function setTypePort($typePort) {
         $this->typePort = $typePort;
         return $this;
-    }
-
-    public function getOpenPorts() {
-        return $this->openPorts;
     }
 
     public function setStartPort($startPort) {
@@ -70,6 +67,10 @@ class PortScanner {
         $this->openPorts = $openPorts;
         return $this;
     }
+    
+    public function getOpenPorts() {
+        return $this->openPorts;
+    }
 
     
     /*
@@ -80,8 +81,6 @@ class PortScanner {
      */
 
     public function scan() {
-        set_time_limit(0);
-        
         if(strtolower($this->typePort) == 'tcp'){
             $hostIp = $this->hostIP;
         } else if(strtolower($this->typePort) == 'udp'){
@@ -92,7 +91,7 @@ class PortScanner {
         
         $errno = $errstr = null;
         for ($portNumber = $this->startPort; $portNumber <= $this->endPort; $portNumber++) {
-            $handle = @fsockopen($this->hostIP, $portNumber, $errno, $errstr, $this->timeout);
+            $handle = @fsockopen($hostIp, $portNumber, $errno, $errstr, $this->timeout);
             if ($handle) {
                 $service = getservbyport($portNumber, strtolower($this->typePort));
                 $this->openPorts[$portNumber] = "$service";
