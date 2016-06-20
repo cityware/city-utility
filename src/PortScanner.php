@@ -20,7 +20,8 @@ class PortScanner {
     private $hostIP;
     private $timeout;
     private $openPorts = array();
-    private $typePort = 'tcp';
+    private $hostTest = array();
+    private $typePort;
 
     // TODO: accept IPv6 addresses
     // TODO: accept an array of host ips
@@ -71,15 +72,54 @@ class PortScanner {
     public function getOpenPorts() {
         return $this->openPorts;
     }
-
-    /*
-     *
-     * Scans the host IP
-     *
-     *
+    
+    /**
+     * Define host to test port
+     * @param string $host
+     * @param integer $port
+     * @param string $typePort
+     * @return \Cityware\Utility\PortScanner
      */
+    public function addHostTest($host, $port, $typePort) {
+        $this->hostTest[] = array($host, $port, $typePort);
+        return $this;
+    }
 
-    public function scan() {
+    /**
+     * Port test for the defined host
+     * @return array
+     */
+    public function portTest() {
+
+        $errno = $errstr = null;
+
+        foreach ($this->hostTest as $keyHostTest => $valueHostTest) {
+            list($host, $portNumber, $typePort) = $valueHostTest;
+
+            if (strtolower($typePort) == 'tcp') {
+                $hostIp = $host;
+            } else {
+                $hostIp = "udp://$host";
+            }
+            
+            $this->openPorts[$keyHostTest];
+
+            $handle = @fsockopen($hostIp, $portNumber, $errno, $errstr, $this->timeout);
+            if ($handle) {
+                $service = $this->getService($portNumber, strtolower($typePort));
+                $this->openPorts[$keyHostTest][$portNumber] = (!empty($service)) ? $service : null;
+                fclose($handle);
+            }
+        }
+        return $this->openPorts;
+    }
+
+    /**
+     * Scan range ports in host
+     * @return array
+     * @throws \Exception
+     */
+    public function scanPortRange() {
         if (strtolower($this->typePort) == 'tcp') {
             $hostIp = $this->hostIP;
         } else if (strtolower($this->typePort) == 'udp') {
@@ -93,7 +133,7 @@ class PortScanner {
             $handle = @fsockopen($hostIp, $portNumber, $errno, $errstr, $this->timeout);
             if ($handle) {
                 $service = $this->getService($portNumber, strtolower($this->typePort));
-                $this->openPorts[$portNumber] = "$service";
+                $this->openPorts[$portNumber] = (!empty($service)) ? $service : null;
                 fclose($handle);
             }
         }

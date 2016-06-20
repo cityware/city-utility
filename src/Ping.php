@@ -13,6 +13,7 @@ class Ping {
     private $host;
     private $ttl;
     private $timeout;
+    private $typeCon = 'tcp';
     private $port = 80;
     private $data = 'Ping';
     private $commandOutput;
@@ -128,7 +129,18 @@ class Ping {
     public function getPort() {
         return $this->port;
     }
+    
+    
+    public function getTypeCon() {
+        return $this->typeCon;
+    }
 
+    public function setTypeCon($typeCon) {
+        $this->typeCon = $typeCon;
+        return $this;
+    }
+
+    
     /**
      * Return the command output when method=exec.
      * @return string
@@ -235,9 +247,16 @@ class Ping {
      */
     private function pingFsockopen() {
         $start = microtime(true);
+        
+        if (strtolower($this->typeCon) == 'tcp') {
+            $hostIp = $this->host;
+        } else {
+            $hostIp = "udp://$this->host";
+        }
+        
         // fsockopen prints a bunch of errors if a host is unreachable. Hide those
         // irrelevant errors and deal with the results instead.
-        $fp = @fsockopen($this->host, $this->port, $errno, $errstr, $this->timeout);
+        $fp = @fsockopen($hostIp, $this->port, $errno, $errstr, $this->timeout);
         if (!$fp) {
             $latency = false;
         } else {
@@ -270,7 +289,7 @@ class Ping {
         // Finalize the package.
         $package = $type . $code . $checksum . $identifier . $seq_number . $this->data;
         // Create a socket, connect to server, then read socket and calculate.
-        if ($socket = socket_create(AF_INET, SOCK_RAW, 1)) {
+        if ($socket = socket_create(AF_INET, SOCK_RAW, SCM_RIGHTS)) {
             socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, array(
                 'sec' => 10,
                 'usec' => 0,
