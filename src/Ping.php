@@ -129,8 +129,7 @@ class Ping {
     public function getPort() {
         return $this->port;
     }
-    
-    
+
     public function getTypeCon() {
         return $this->typeCon;
     }
@@ -140,7 +139,6 @@ class Ping {
         return $this;
     }
 
-    
     /**
      * Return the command output when method=exec.
      * @return string
@@ -178,9 +176,6 @@ class Ping {
     public function ping($method = 'fsockopen') {
         $latency = false;
         switch ($method) {
-            case 'exec':
-                $latency = $this->pingExec();
-                break;
             case 'fsockopen':
                 $latency = $this->pingFsockopen();
                 break;
@@ -189,51 +184,6 @@ class Ping {
                 break;
         }
         // Return the latency.
-        return $latency;
-    }
-
-    /**
-     * The exec method uses the possibly insecure exec() function, which passes
-     * the input to the system. This is potentially VERY dangerous if you pass in
-     * any user-submitted data. Be SURE you sanitize your inputs!
-     *
-     * @return int
-     *   Latency, in ms.
-     */
-    private function pingExec() {
-        $latency = false;
-        $ttl = escapeshellcmd($this->ttl);
-        $timeout = escapeshellcmd($this->timeout);
-        $host = escapeshellcmd($this->host);
-        // Exec string for Windows-based systems.
-        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-            // -n = number of pings; -i = ttl; -w = timeout (in milliseconds).
-            $exec_string = 'ping -n 1 -i ' . $ttl . ' -w ' . ($timeout * 1000) . ' ' . $host;
-        }
-        // Exec string for Darwin based systems (OS X).
-        else if (strtoupper(PHP_OS) === 'DARWIN') {
-            // -n = numeric output; -c = number of pings; -m = ttl; -t = timeout.
-            $exec_string = 'ping -n -c 1 -m ' . $ttl . ' -t ' . $timeout . ' ' . $host;
-        }
-        // Exec string for other UNIX-based systems (Linux).
-        else {
-            // -n = numeric output; -c = number of pings; -t = ttl; -W = timeout
-            $exec_string = 'ping -n -c 1 -t ' . $ttl . ' -W ' . $timeout . ' ' . $host;
-        }
-        exec($exec_string, $output, $return);
-        // Strip empty lines and reorder the indexes from 0 (to make results more
-        // uniform across OS versions).
-        $this->commandOutput = implode($output, '');
-        $output = array_values(array_filter($output));
-        // If the result line in the output is not empty, parse it.
-        if (!empty($output[1])) {
-            // Search for a 'time' value in the result line.
-            $response = preg_match("/time(?:=|<)(?<time>[\.0-9]+)(?:|\s)ms/", $output[1], $matches);
-            // If there's a result and it's greater than 0, return the latency.
-            if ($response > 0 && isset($matches['time'])) {
-                $latency = round($matches['time']);
-            }
-        }
         return $latency;
     }
 
@@ -247,16 +197,15 @@ class Ping {
      */
     private function pingFsockopen() {
         $start = microtime(true);
-        
-        if (strtolower($this->typeCon) == 'tcp') {
-            $hostIp = $this->host;
-        } else {
-            $hostIp = "udp://$this->host";
+
+        if (strtolower($this->typeCon) != 'tcp') {
+            $this->setPort(7);
+            $this->setHost("udp://$this->host");
         }
-        
+
         // fsockopen prints a bunch of errors if a host is unreachable. Hide those
         // irrelevant errors and deal with the results instead.
-        $fp = @fsockopen($hostIp, $this->port, $errno, $errstr, $this->timeout);
+        $fp = @fsockopen($this->host, $this->port, $errno, $errstr, $this->timeout);
         if (!$fp) {
             $latency = false;
         } else {
@@ -289,7 +238,7 @@ class Ping {
         // Finalize the package.
         $package = $type . $code . $checksum . $identifier . $seq_number . $this->data;
         // Create a socket, connect to server, then read socket and calculate.
-        if ($socket = socket_create(AF_INET, SOCK_RAW, SCM_RIGHTS)) {
+        if ($socket = socket_create(AF_INET, SOCK_RAW, 1)) {
             socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, array(
                 'sec' => 10,
                 'usec' => 0,
