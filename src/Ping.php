@@ -163,7 +163,7 @@ class Ping {
      * @return mixed
      *   Latency as integer, in ms, if host is reachable or FALSE if host is down.
      */
-    public function ping($method = 'exec') {
+    public function ping($method = 'fsockopen') {
         $latency = false;
         switch ($method) {
             case 'exec':
