@@ -37,7 +37,7 @@ class PortScanner {
         $this->typePort = $typePort;
         set_time_limit(0);
     }
-    
+
     public function setTypePort($typePort) {
         $this->typePort = $typePort;
         return $this;
@@ -67,12 +67,11 @@ class PortScanner {
         $this->openPorts = $openPorts;
         return $this;
     }
-    
+
     public function getOpenPorts() {
         return $this->openPorts;
     }
 
-    
     /*
      *
      * Scans the host IP
@@ -81,24 +80,54 @@ class PortScanner {
      */
 
     public function scan() {
-        if(strtolower($this->typePort) == 'tcp'){
+        if (strtolower($this->typePort) == 'tcp') {
             $hostIp = $this->hostIP;
-        } else if(strtolower($this->typePort) == 'udp'){
+        } else if (strtolower($this->typePort) == 'udp') {
             $hostIp = "udp://$this->hostIP";
         } else {
             throw new \Exception('Port Type undefined!');
         }
-        
+
         $errno = $errstr = null;
         for ($portNumber = $this->startPort; $portNumber <= $this->endPort; $portNumber++) {
             $handle = @fsockopen($hostIp, $portNumber, $errno, $errstr, $this->timeout);
             if ($handle) {
-                $service = getservbyport($portNumber, strtolower($this->typePort));
+                $service = $this->getService($portNumber, strtolower($this->typePort));
                 $this->openPorts[$portNumber] = "$service";
                 fclose($handle);
             }
         }
         return $this->openPorts;
+    }
+
+    /**
+     * Get name of the service that is listening on a certain port.
+     *
+     * @param integer $port     Portnumber
+     * @param string  $protocol Protocol (Is either tcp or udp. Default is tcp.)
+     *
+     * @access public
+     *
+     * @return string  Name of the Internet service associated with $service
+     */
+    public function getService($port) {
+        return @getservbyport($port, strtolower($this->typePort));
+    }
+
+    // }}}
+    // {{{ getPort()
+    /**
+     * Get port that a certain service uses.
+     *
+     * @param string $service  Name of the service
+     * @param string $protocol Protocol (Is either tcp or udp. Default is tcp.)
+     *
+     * @access public
+     *
+     * @return integer Internet port which corresponds to $service
+     */
+    public function getPort($service) {
+        return @getservbyname($service, strtolower($this->typePort));
     }
 
 }
