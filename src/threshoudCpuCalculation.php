@@ -13,7 +13,7 @@ namespace Cityware\Utility;
  *
  * @author fsvxavier
  */
-final class threshoudCpuCalculation {
+final class ThreshoudCpuCalculation {
     
     /**
      * Return calculation Threshoud alert CPU
