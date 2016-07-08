@@ -173,7 +173,7 @@ class Ping {
      * @return mixed
      *   Latency as integer, in ms, if host is reachable or FALSE if host is down.
      */
-    public function ping($method = 'fsockopen') {
+    public function ping($method = 'socket') {
         $latency = false;
         switch ($method) {
             case 'fsockopen':
@@ -239,10 +239,7 @@ class Ping {
         $package = $type . $code . $checksum . $identifier . $seq_number . $this->data;
         // Create a socket, connect to server, then read socket and calculate.
         if ($socket = socket_create(AF_INET, SOCK_RAW, 1)) {
-            socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, array(
-                'sec' => 10,
-                'usec' => 0,
-            ));
+            socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, array('sec' => 10,'usec' => 0));
             // Prevent errors from being printed when host is unreachable.
             @socket_connect($socket, $this->host, null);
             $start = microtime(true);
