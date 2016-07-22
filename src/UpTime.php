@@ -12,13 +12,13 @@ class UpTime {
 
     public static function calculationUpTime($localDateTime, $lastBootUpTime) {
 
-        $fLocalDateTime = $this->convertToDateTime($localDateTime);
-        $fLastBootUpTime = $this->convertToDateTime($lastBootUpTime);
+        $fLocalDateTime = self::convertToDateTime($localDateTime);
+        $fLastBootUpTime = self::convertToDateTime($lastBootUpTime);
         $interval = strtotime($fLocalDateTime) - strtotime($fLastBootUpTime);
         return $interval;
     }
 
-    private function convertToDateTime($wmiData) {
+    private static function convertToDateTime($wmiData) {
 
         $aWmiData = explode(".", $wmiData);
         $dateTimeWmi = $aWmiData[0];
